@@ -53,7 +53,7 @@ services:
     environment:
       - PROJECT_DIR=${PROJECT_DIR}
     container_name: rs_api_nginx
-    image: api_nginx
+    image: rs_api_nginx
     volumes:
       - static_volume:$PROJECT_DIR/static
       - media_volume:$PROJECT_DIR/media
