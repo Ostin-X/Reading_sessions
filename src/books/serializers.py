@@ -1,7 +1,7 @@
 from django.db.models import F
 from rest_framework import serializers
 
-from .models import Book, ReadingSession, User
+from .models import Book, ReadingSession, User, ReadingProfile
 
 
 class UserReadingSessionSerializer(serializers.ModelSerializer):
@@ -29,11 +29,16 @@ class UserReadingSessionSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     sessions = serializers.SerializerMethodField()
+    reading_last_week = serializers.SerializerMethodField()
+    reading_last_month = serializers.SerializerMethodField()
     user_all_books_total_reading_time = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'user_all_books_total_reading_time', 'sessions')
+        fields = (
+            'id', 'username', 'password', 'reading_last_week', 'reading_last_month',
+            'user_all_books_total_reading_time',
+            'sessions')
 
     def get_sessions(self, obj):
         sessions = obj.readingsession_set.order_by(F('end_time').desc(nulls_first=True))
@@ -46,6 +51,12 @@ class UserSerializer(serializers.ModelSerializer):
         # minutes, seconds = divmod(remainder, 60)
         # return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
 
+    def get_reading_last_week(self, obj):
+        return obj.readingprofile.reading_last_week.total_seconds()
+
+    def get_reading_last_month(self, obj):
+        return obj.readingprofile.reading_last_month.total_seconds()
+
 
 class BookSerializer(serializers.ModelSerializer):
     short_description = serializers.SerializerMethodField()
@@ -55,6 +66,8 @@ class BookSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'author', 'publication_year', 'short_description', 'description')
 
     def get_short_description(self, obj):
+        # from books.tasks import get_print
+        # get_print.delay()
         return obj.description[:50] + '...'
 
     def get_last_reading_session(self, obj):
@@ -97,6 +110,7 @@ class ReadingSessionSerializer(serializers.ModelSerializer):
     total_time = serializers.CharField(read_only=True)
     start_time = serializers.DateTimeField(read_only=True)
     end_time = serializers.DateTimeField(read_only=True)
+
     # is active
 
     class Meta:
