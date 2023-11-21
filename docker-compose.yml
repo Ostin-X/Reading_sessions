@@ -3,15 +3,31 @@ version: '3.8'
 services:
   redis:
     image: redis
-    restart: always
+#    restart: always
+    restart: no
 
-  api:
-    restart: always
+
+  common_build:
     build:
       context: .
       dockerfile: ./src/api/docker/Dockerfile
       args:
         PROJECT_DIR: ${PROJECT_DIR}
+    restart: no
+
+  celery-beats:
+    env_file: .env
+    extends:
+      service: common_build
+    command: celery -A api beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+  worker:
+    env_file: .env
+    extends:
+      service: common_build
+    command: celery -A api worker --loglevel=INFO
+
+  rs_api:
     ports:
       - "8000:8000"
     env_file: .env
@@ -25,21 +41,24 @@ services:
       sh -c "python manage.py collectstatic --noinput &&
              python manage.py migrate &&
              gunicorn api.wsgi:application -b 0.0.0.0:8000"
+    extends:
+      service: common_build
 
   nginx:
-    restart: always
+#    restart: always
+    restart: no
     build:
       dockerfile: ./Dockerfile
       context: ./src/api/docker/nginx/
     environment:
       - PROJECT_DIR=${PROJECT_DIR}
-    container_name: api_nginx
+    container_name: rs_api_nginx
     image: api_nginx
     volumes:
       - static_volume:$PROJECT_DIR/static
       - media_volume:$PROJECT_DIR/media
     depends_on:
-      - api
+      - rs_api
     ports:
       - "80:80"
 

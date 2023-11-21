@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     # third party apps
     "rest_framework",
     'drf_yasg',
+    'django_celery_beat',
     # core apps
     "books",
 ]
@@ -114,3 +115,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379')
