@@ -17,6 +17,14 @@ django-celery-beat = "^2.5.0"
 [tool.poetry.group.dev.dependencies]
 faker = "^20.0.3"
 
+[tool.poetry.group.test.dependencies]
+pytest-django = "^4.5.2"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = 'src.api.settings'
+python_files = ['tests.py', 'test_*.py', '*_tests.py']
+pythonpath = '. src'
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
