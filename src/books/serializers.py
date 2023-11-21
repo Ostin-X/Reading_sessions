@@ -67,6 +67,7 @@ class BookSerializer(serializers.ModelSerializer):
             return None
 
         latest_session = sessions[0]
+
         if latest_session.is_active:
             return 'is_active'
         if time := latest_session.end_time:
@@ -81,8 +82,10 @@ class BookSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
 
         if request and str(instance.id) in request.path.split("/"):
-            representation['last_reading_session'] = self.get_last_reading_session(instance)
-            representation['user_book_total_reading_time'] = self.get_user_book_total_reading_time(instance, request.user)
+            if request.user.is_authenticated:
+                representation['last_reading_session'] = self.get_last_reading_session(instance)
+                representation['user_book_total_reading_time'] = self.get_user_book_total_reading_time(instance,
+                                                                                                       request.user)
             representation['book_total_reading_time'] = instance.book_total_reading_time
         else:
             representation.pop('description')
@@ -94,6 +97,7 @@ class ReadingSessionSerializer(serializers.ModelSerializer):
     total_time = serializers.CharField(read_only=True)
     start_time = serializers.DateTimeField(read_only=True)
     end_time = serializers.DateTimeField(read_only=True)
+    # is active
 
     class Meta:
         model = ReadingSession

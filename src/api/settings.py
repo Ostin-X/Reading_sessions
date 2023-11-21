@@ -116,3 +116,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379')
+
+# LOGIN_REDIRECT_URL = 'books-list'
+LOGIN_REDIRECT_URL = 'redirect-to-user-detail'

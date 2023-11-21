@@ -26,5 +26,4 @@ class OwnOrStuffPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-
-        return user.id == view.kwargs.get("pk") or user.is_staff or user.is_superuser
+        return str(user.id) == view.kwargs.get("pk") or user.is_staff or user.is_superuser
