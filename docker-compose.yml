@@ -3,8 +3,8 @@ version: '3.8'
 services:
   redis:
     image: redis
-    restart: always
-#    restart: no
+#    restart: always
+    restart: no
 
 
   common_build:
@@ -13,8 +13,8 @@ services:
       dockerfile: ./src/api/docker/Dockerfile
       args:
         PROJECT_DIR: ${PROJECT_DIR}
-    restart: always
-#    restart: no
+#    restart: always
+    restart: no
 
   celery-beats:
     env_file: .env
@@ -46,8 +46,8 @@ services:
       service: common_build
 
   nginx:
-    restart: always
-#    restart: no
+#    restart: always
+    restart: no
     build:
       dockerfile: ./Dockerfile
       context: ./src/api/docker/nginx/

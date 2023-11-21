@@ -52,10 +52,10 @@ class UserSerializer(serializers.ModelSerializer):
         # return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
 
     def get_reading_last_week(self, obj):
-        return obj.readingprofile.reading_last_week.total_seconds()
+        return obj.readingprofile.reading_last_week
 
     def get_reading_last_month(self, obj):
-        return obj.readingprofile.reading_last_month.total_seconds()
+        return obj.readingprofile.reading_last_month
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -68,6 +68,7 @@ class BookSerializer(serializers.ModelSerializer):
     def get_short_description(self, obj):
         # from books.tasks import get_print
         # get_print.delay()
+        # ReadingProfile.update_all_profiles()
         return obj.description[:50] + '...'
 
     def get_last_reading_session(self, obj):
