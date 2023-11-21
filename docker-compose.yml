@@ -1,34 +1,26 @@
-version: '3.11'
+version: '3.8'
 
 services:
-#  redis:
-#    image: redis
-#    restart: always
-#
-#  celery-beats:
-#    restart: always
-#    env_file: .env
-#    build:
-#      context: .
-#    command: celery -A dwr beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-#
-#  worker:
-#    restart: always
-#    env_file: .env
-#    build:
-#      context: .
-#    command: celery -A dwr worker --loglevel=INFO
+  redis:
+    image: redis
+    restart: always
 
-  rs_api:
+  api:
     restart: always
     build:
       context: .
+      dockerfile: ./src/api/docker/Dockerfile
+      args:
+        PROJECT_DIR: ${PROJECT_DIR}
     ports:
       - "8000:8000"
     env_file: .env
+    environment:
+      - REDIS_LOCATION=redis://redis:6379/1
     volumes:
-      - static_volume:/code/static
-      - media_volume:/code/media
+      - ./src:$PROJECT_DIR
+      - static_volume:$PROJECT_DIR/static
+      - media_volume:$PROJECT_DIR/media
     command: >
       sh -c "python manage.py collectstatic --noinput &&
              python manage.py migrate &&
@@ -38,14 +30,16 @@ services:
     restart: always
     build:
       dockerfile: ./Dockerfile
-      context: ./docker/nginx/
-    container_name: rs_api_nginx
-    image: rs_api_nginx
+      context: ./src/api/docker/nginx/
+    environment:
+      - PROJECT_DIR=${PROJECT_DIR}
+    container_name: api_nginx
+    image: api_nginx
     volumes:
-      - static_volume:/code/static
-      - media_volume:/code/media
+      - static_volume:$PROJECT_DIR/static
+      - media_volume:$PROJECT_DIR/media
     depends_on:
-      - rs_api
+      - api
     ports:
       - "80:80"
 

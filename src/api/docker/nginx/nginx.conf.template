@@ -1,0 +1,21 @@
+upstream api {
+    server api:8000;
+}
+
+server {
+
+    listen 80;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://api;
+    }
+
+    location /static/ {
+        alias /$PROJECT_DIR/static/;
+    }
+
+    location /media/ {
+        alias /$PROJECT_DIR/media/;
+    }
+}
