@@ -20,6 +20,7 @@ faker = "^20.0.3"
 
 [tool.poetry.group.test.dependencies]
 pytest-django = "^4.5.2"
+coverage = "^7.3.2"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = 'src.api.settings'
