@@ -73,7 +73,7 @@ class TestReadingSessionModel:
         assert reading_session1.start_time and not reading_session1.end_time
         assert reading_session2.start_time and reading_session2.end_time
 
-        # Ending session 2, not active. Updating both sessions info. Nothing should change.
+        # Ending session 2, not active. Updating both session's info. Nothing should change.
         reading_session2.end_reading()
         reading_session1 = ReadingSession.objects.get(pk=reading_session1.pk)
         reading_session2 = ReadingSession.objects.get(pk=reading_session2.pk)
@@ -131,12 +131,12 @@ class TestReadingSessionModel:
 
         assert get_user_all_books_total_reading_time == test_value['total_time']
 
-    def test_user_book_change_time(self, five_user, five_books):
+    def test_user_book_change_time(self, five_users, five_books):
         assert Book.objects.count() == 5
         assert User.objects.count() == 5
 
-        user1 = five_user[0]
-        user2 = five_user[1]
+        user1 = five_users[0]
+        user2 = five_users[1]
         book1 = five_books[0]
         book2 = five_books[1]
 
@@ -150,7 +150,18 @@ class TestReadingSessionModel:
             reading_session.save()
             print(reading_session.user)
         except Exception as e:
-            assert type(e) == ValidationError
+            assert isinstance(e, ValidationError)
+            assert e.messages[0] == "Cannot change the 'user' and 'book' of an existing reading session."
+        else:
+            assert False
+
+        try:
+            print(reading_session.user)
+            reading_session.book = book2
+            reading_session.save()
+            print(reading_session.user)
+        except Exception as e:
+            assert isinstance(e, ValidationError)
             assert e.messages[0] == "Cannot change the 'user' and 'book' of an existing reading session."
         else:
             assert False

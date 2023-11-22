@@ -13,7 +13,7 @@ def user():
 
 
 @pytest.fixture
-def five_user():
+def five_users():
     return [User.objects.create(username=f'testuser{i}') for i in range(1, 6)]
 
 
