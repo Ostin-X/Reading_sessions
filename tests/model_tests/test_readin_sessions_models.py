@@ -145,10 +145,8 @@ class TestReadingSessionModel:
         assert ReadingSession.objects.count() == 1
 
         try:
-            print(reading_session.user)
             reading_session.user = user2
             reading_session.save()
-            print(reading_session.user)
         except Exception as e:
             assert isinstance(e, ValidationError)
             assert e.messages[0] == "Cannot change the 'user' and 'book' of an existing reading session."
@@ -156,10 +154,8 @@ class TestReadingSessionModel:
             assert False
 
         try:
-            print(reading_session.user)
             reading_session.book = book2
             reading_session.save()
-            print(reading_session.user)
         except Exception as e:
             assert isinstance(e, ValidationError)
             assert e.messages[0] == "Cannot change the 'user' and 'book' of an existing reading session."
