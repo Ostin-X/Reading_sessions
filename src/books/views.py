@@ -2,9 +2,9 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from rest_framework import status
 from rest_framework import viewsets, filters
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
 
 from .models import Book, ReadingSession, User
 from .permissions import OwnOrStuffPermission, ReadOnlyOrStuffPermission
@@ -65,8 +65,9 @@ class StartReading(APIView):
     """
 
     def post(self, request, *args, **kwargs):
-        user, book = get_book_and_user(kwargs, request)
-        if user is None or book is None:
+        user, book = get_book_and_user(request, kwargs)
+
+        if user is None or user.is_anonymous or book is None:
             return Response({"error": "User or Book not found."},
                             status=status.HTTP_404_NOT_FOUND)
 
