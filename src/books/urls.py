@@ -14,8 +14,8 @@ urlpatterns = [
 
     path('signup/', UserSignupView.as_view(), name='signup'),
 
-    path('books/<int:book_id>/start/', StartReading.as_view(), name='start-reading'),
-    path('books/<int:book_id>/end/', EndReading.as_view(), name='end-reading'),
+    path('books/<int:pk>/start/', StartReading.as_view(), name='start-reading'),
+    path('books/<int:pk>/end/', EndReading.as_view(), name='end-reading'),
     path('redirect-to-user-detail/', RedirectToUserDetailView.as_view(), name='redirect-to-user-detail'),
 
 ]

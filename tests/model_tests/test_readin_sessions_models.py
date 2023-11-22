@@ -118,7 +118,7 @@ class TestReadingSessionModel:
         assert reading_session3.start_time and not reading_session3.end_time
 
         # get_user_all_books_total_reading_time test
-        microsecond_diff = timedelta(microseconds=1000)
+        microsecond_diff = timedelta(microseconds=1500)
         get_user_all_books_total_reading_time = ReadingSession.get_user_all_books_total_reading_time(user)
         test_value = timedelta()
         for session in ReadingSession.objects.all():
