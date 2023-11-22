@@ -17,8 +17,8 @@ class UserModelViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [OwnOrStuffPermission]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ('username', 'email')
-    ordering_fields = ('username', 'email')
+    search_fields = ('username', 'readingsession__book__title')
+    ordering_fields = ('username', 'readingsession__book__title')
 
 
 class ValidationError:
@@ -33,13 +33,12 @@ class UserSignupView(CreateAPIView):
 
         serializer.is_valid(raise_exception=True)
 
-        user = User.objects.create_user(**serializer.validated_data)
+        User.objects.create_user(**serializer.validated_data)
 
         message = "New user created"
         status_code = status.HTTP_201_CREATED
 
         return Response({"message": message}, status=status_code)
-
 
 
 class BookModelViewSet(viewsets.ModelViewSet):
