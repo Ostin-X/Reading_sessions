@@ -7,7 +7,7 @@ from books.models import Book
 
 
 @pytest.mark.django_db(transaction=True)
-class TestReadingProfileSignal:
+class TestBookModel:
 
     def test_book_total_reading_time(self, book):
         assert Book.objects.count() == 1

@@ -8,7 +8,7 @@ from books.models import ReadingProfile
 
 
 @pytest.mark.django_db(transaction=True)
-class TestReadingProfileSignal:
+class TestReadingProfileModel:
 
     def test_create_reading_profile_signal(self):
         assert User.objects.count() == 0
@@ -23,7 +23,8 @@ class TestReadingProfileSignal:
         assert User.objects.first().username == "testuser"
         assert ReadingProfile.objects.first().user == user
 
-    def test_update_daily_reading_profile(self, user, reading_profile):
+    def test_update_daily_reading_profile(self, user):
+        reading_profile = user.readingprofile
 
         assert reading_profile.reading_last_week == timedelta(0)
         assert reading_profile.reading_last_month == timedelta(0)

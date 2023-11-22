@@ -1,12 +1,12 @@
 import logging
 from datetime import timedelta, datetime
-from django.contrib.postgres.fields import ArrayField
-from django.db import transaction
+
 import pytz
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import transaction, models
 
 
 def get_empty_list():
@@ -127,7 +127,7 @@ class ReadingSession(models.Model):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    start_time = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     total_time = models.DurationField(default=timedelta(0))
 
@@ -161,7 +161,7 @@ class ReadingSession(models.Model):
         """
         Evaluates whether the reading session is currently active.
         """
-        return self.end_time is None
+        return self.start_time and self.end_time is None
 
     @property
     def session_total_reading_time(self):
@@ -176,14 +176,18 @@ class ReadingSession(models.Model):
         """
             Starts a reading session for a user.
             Sends request to end all other sessions for the same user that are currently active.
-            """
+        """
         try:
-            open_sessions = ReadingSession.objects.select_for_update().exclude(id=self.id).filter(user=self.user,
-                                                                                                  end_time__isnull=True)
+            with transaction.atomic():
+                open_sessions = ReadingSession.objects.select_for_update().exclude(id=self.id).filter(user=self.user,
+                                                                                                      end_time__isnull=True)
+                for session in open_sessions:
+                    session.end_reading()
 
-            for session in open_sessions:
-                session.end_reading()
-
+        except transaction.TransactionManagementError:
+            # Safely ignore the transaction error.
+            pass
+        try:
             if self.start_time is None or self.start_time and self.end_time:
                 self.start_time = get_current_time_in_timezone()
                 self.end_time = None
@@ -194,11 +198,10 @@ class ReadingSession(models.Model):
     def end_reading(self):
         """
             Ends a current reading session.
-            """
+        """
         try:
             if self.start_time and not self.end_time:
                 self.end_time = get_current_time_in_timezone()
-
                 self.total_time += self.end_time - self.start_time
                 self.save()
         except Exception as e:
