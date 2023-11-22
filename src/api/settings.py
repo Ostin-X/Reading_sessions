@@ -3,6 +3,8 @@ from pathlib import Path
 
 from environ import Env
 
+from books.tasks import default_schedule
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -128,6 +130,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGIN_REDIRECT_URL = 'redirect-to-user-detail'
+
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379')
 
-LOGIN_REDIRECT_URL = 'redirect-to-user-detail'
+CELERY_BEAT_SCHEDULE = {
+    'daily-update-profiles': {
+        'task': 'books.tasks.daily_update_profiles',
+        'schedule': default_schedule(),
+    },
+    # Add more scheduled tasks as needed
+}

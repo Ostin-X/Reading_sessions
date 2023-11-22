@@ -3,24 +3,7 @@ version: '3.8'
 services:
   redis:
     image: redis
-#    restart: always
-    restart: no
-
-
-  common_build:
-    build:
-      context: .
-      dockerfile: ./src/api/docker/Dockerfile
-      args:
-        PROJECT_DIR: ${PROJECT_DIR}
-#    restart: always
-    restart: no
-
-  celery-beats:
-    env_file: .env
-    extends:
-      service: common_build
-    command: celery -A api beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    restart: always
 
   db:
     image: postgres:13
@@ -30,14 +13,7 @@ services:
       POSTGRES_PASSWORD: 'qweqweqweqwe'
     volumes:
       - pg_data:/var/lib/postgresql/data
-
-  worker:
-    env_file: .env
-    extends:
-      service: common_build
-    command: celery -A api worker --loglevel=INFO
-    depends_on:
-      - db
+    restart: always
 
   rs_api:
     ports:
@@ -49,21 +25,55 @@ services:
       - ./src:$PROJECT_DIR
       - static_volume:$PROJECT_DIR/static
       - media_volume:$PROJECT_DIR/media
-#             python manage.py fill_users &&
     command: >
       sh -c "python manage.py collectstatic --noinput &&
              python manage.py migrate &&
              python manage.py create_admin &&
              python manage.py fill_books &&
+             python manage.py fill_users &&
              gunicorn api.wsgi:application -b 0.0.0.0:8000"
-    extends:
-      service: common_build
+    build:
+      context: .
+      dockerfile: ./src/api/docker/Dockerfile
+      args:
+        PROJECT_DIR: ${PROJECT_DIR}
+    restart: always
+    depends_on:
+      - db
+
+  common_build:
+    build:
+      context: .
+      dockerfile: ./src/api/docker/Dockerfile
+      args:
+        PROJECT_DIR: ${PROJECT_DIR}
+    restart: always
+#    restart: no
+
+  celery-beats:
+    env_file: .env
+    build:
+      context: .
+      dockerfile: ./src/api/docker/Dockerfile
+      args:
+        PROJECT_DIR: ${PROJECT_DIR}
+    restart: always
+    command: celery -A api beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+  worker:
+    env_file: .env
+    build:
+      context: .
+      dockerfile: ./src/api/docker/Dockerfile
+      args:
+        PROJECT_DIR: ${PROJECT_DIR}
+    restart: always
+    command: celery -A api worker --loglevel=INFO
     depends_on:
       - db
 
   nginx:
-#    restart: always
-    restart: no
+    restart: always
     build:
       dockerfile: ./Dockerfile
       context: ./src/api/docker/nginx/

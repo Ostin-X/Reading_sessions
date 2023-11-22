@@ -39,8 +39,8 @@ class ReadingProfile(models.Model):
         """Update the daily reading history for last 31 days"""
         if len(self.daily_reading_time) > 30:
             self.daily_reading_time = self.daily_reading_time[-30:]
-        # today_reading_time = self._update_last_day_total_reading_time()
-        today_reading_time = str(self._update_last_day_total_reading_time())
+        today_reading_time = self._update_last_day_total_reading_time()
+        # today_reading_time = str(self._update_last_day_total_reading_time())
         self.daily_reading_time.append(today_reading_time)
         self.save()
 
@@ -50,8 +50,9 @@ class ReadingProfile(models.Model):
         if num_days < 1:
             return timedelta(0)
 
-        reading_times = [parse_duration(time_str) for time_str in self.daily_reading_time[-num_days:]]
-        total_reading_time = sum(reading_times, timedelta())
+        # reading_times = [parse_duration(time_str) for time_str in self.daily_reading_time[-num_days:]]
+        # total_reading_time = sum(reading_times, timedelta())
+        total_reading_time = sum(self.daily_reading_time[-num_days:], timedelta())
 
         return total_reading_time
 

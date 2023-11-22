@@ -1,4 +1,9 @@
 from celery import shared_task
+from datetime import timedelta
+
+
+def default_schedule(minutes=1):
+    return timedelta(minutes=minutes)
 
 
 @shared_task
