@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from django.contrib.postgres.fields import ArrayField
 
 import pytz
 from django.contrib.auth.models import User
@@ -20,7 +21,9 @@ class ReadingProfile(models.Model):
     reading_last_week = models.DurationField(default=timedelta(0))
     reading_last_month = models.DurationField(default=timedelta(0))
     last_day_total_reading_time = models.DurationField(default=timedelta(0))
-    daily_reading_time = models.JSONField(default=get_empty_list)
+    # daily_reading_time = models.JSONField(default=get_empty_list)
+    # daily_reading_time = ArrayField(models.TextField(), default=list)
+    daily_reading_time = ArrayField(models.DurationField(), default=list)
 
     def __str__(self):
         return f"{self.user.username}'s ReadingProfile"
@@ -34,15 +37,16 @@ class ReadingProfile(models.Model):
 
     def _update_daily_reading_history(self):
         """Update the daily reading history for last 31 days"""
-        self.daily_reading_time = self.daily_reading_time[-30:]
+        if len(self.daily_reading_time) > 30:
+            self.daily_reading_time = self.daily_reading_time[-30:]
         # today_reading_time = self._update_last_day_total_reading_time()
         today_reading_time = str(self._update_last_day_total_reading_time())
         self.daily_reading_time.append(today_reading_time)
+        self.save()
 
     def _update_reading_last_days(self, num_days) -> timedelta:
         """Calculate the total reading time for the specified number of days."""
         num_days = min(num_days, len(self.daily_reading_time))
-
         if num_days < 1:
             return timedelta(0)
 

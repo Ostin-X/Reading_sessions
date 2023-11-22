@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from . import views
-from .views import StartReading, EndReading, RedirectToUserDetailView
+from .views import StartReading, EndReading, RedirectToUserDetailView, UserSignupView
 
 router = DefaultRouter()
 router.register(r'users', views.UserModelViewSet, basename='users')
@@ -11,6 +11,8 @@ router.register(r'sessions', views.ReadingSessionModelViewSet, basename='session
 
 urlpatterns = [
     path('', include(router.urls)),
+
+    path('signup/', UserSignupView.as_view(), name='signup'),
 
     path('books/<int:book_id>/start/', StartReading.as_view(), name='start-reading'),
     path('books/<int:book_id>/end/', EndReading.as_view(), name='end-reading'),

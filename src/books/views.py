@@ -1,11 +1,12 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.shortcuts import redirect
 from django.urls import reverse
-from .models import Book, ReadingSession, User
+from rest_framework import status
 from rest_framework import viewsets, filters
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 
+from .models import Book, ReadingSession, User
 from .permissions import OwnOrStuffPermission, ReadOnlyOrStuffPermission
 from .serializers import ReadingSessionSerializer, UserSerializer, BookSerializer
 from .utils import get_book_and_user
@@ -18,6 +19,27 @@ class UserModelViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ('username', 'email')
     ordering_fields = ('username', 'email')
+
+
+class ValidationError:
+    pass
+
+
+class UserSignupView(CreateAPIView):
+    serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.create_user(**serializer.validated_data)
+
+        message = "New user created"
+        status_code = status.HTTP_201_CREATED
+
+        return Response({"message": message}, status=status_code)
+
 
 
 class BookModelViewSet(viewsets.ModelViewSet):

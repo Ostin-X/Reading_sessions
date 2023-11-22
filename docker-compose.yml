@@ -22,11 +22,22 @@ services:
       service: common_build
     command: celery -A api beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: 'books_db'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'qweqweqweqwe'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
   worker:
     env_file: .env
     extends:
       service: common_build
     command: celery -A api worker --loglevel=INFO
+    depends_on:
+      - db
 
   rs_api:
     ports:
@@ -38,12 +49,17 @@ services:
       - ./src:$PROJECT_DIR
       - static_volume:$PROJECT_DIR/static
       - media_volume:$PROJECT_DIR/media
+#             python manage.py fill_users &&
     command: >
       sh -c "python manage.py collectstatic --noinput &&
              python manage.py migrate &&
+             python manage.py create_admin &&
+             python manage.py fill_books &&
              gunicorn api.wsgi:application -b 0.0.0.0:8000"
     extends:
       service: common_build
+    depends_on:
+      - db
 
   nginx:
 #    restart: always
@@ -66,3 +82,4 @@ services:
 volumes:
   static_volume:
   media_volume:
+  pg_data:

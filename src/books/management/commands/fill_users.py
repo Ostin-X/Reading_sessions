@@ -14,7 +14,8 @@ class Command(BaseCommand):
         parser.add_argument('-c', '--count', type=int, help='Indicates the number of users to be created')
 
     def handle(self, *args, **kwargs):
-        count = kwargs.get('count', 10)
+        if not (count := kwargs['count']):
+            count = 10
 
         with transaction.atomic():
             for _ in range(count):
