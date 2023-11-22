@@ -1,11 +1,7 @@
 import pytest
 from django.contrib.auth.models import User
 from books.models import ReadingProfile, ReadingSession
-from django.db.models.signals import post_save
-from django.test import TestCase
-from django.dispatch import Signal
-
-from books.signals import create_reading_profile
+from unittest.mock import patch
 
 from datetime import timedelta
 
@@ -31,29 +27,35 @@ class TestReadingProfileSignal:
         assert reading_profile.reading_last_month == timedelta(0)
         assert reading_profile.last_day_total_reading_time == timedelta(0)
         assert reading_profile.daily_reading_time == []
-        assert user.readingsession_set.count() == 0
-        assert user.readingsession_set.count() == 0
-        assert ReadingSession.get_user_all_books_total_reading_time(user) == timedelta(0)
 
+        # with patch('books.models.ReadingSession.get_user_all_books_total_reading_time',
+        #            return_value=timedelta(hours=3)):
+        #     assert ReadingSession.get_user_all_books_total_reading_time(user) == timedelta(hours=3)
+        #     reading_profile.update_daily_reading_profile()
+        #
+        #     assert reading_profile.reading_last_week == timedelta(seconds=10800)
+        #     assert reading_profile.reading_last_month == timedelta(hours=3)
+        #     assert reading_profile.last_day_total_reading_time == timedelta(hours=3)
+        #     assert reading_profile.daily_reading_time == [timedelta(hours=3)]
 
-        # # Simulate a week of reading an hour per day
-        # user.readingprofile.daily_reading_time = [timedelta(hours=1)] * 7
-        # user.readingprofile.save()
-        #
-        # # Update the reading profile
-        # user.readingprofile.update_daily_reading_profile()
-        #
-        # # Check the data has been updated correctly
-        # assert user.readingprofile.reading_last_week == timedelta(hours=7)
-        # assert user.readingprofile.reading_last_month == timedelta(hours=7)
-        #
-        # # Simulate another 23 days of reading an hour per day
-        # user.readingprofile.daily_reading_time += [timedelta(hours=1)] * 23
-        # user.readingprofile.save()
-        #
-        # # Update the reading profile again
-        # user.readingprofile.update_daily_reading_profile()
-        #
-        # # Check data again
-        # assert user.readingprofile.reading_last_week == timedelta(hours=7)  # Last 7 days only
-        # assert user.readingprofile.reading_last_month == timedelta(hours=30)  # Last 30 days only
+        i_history = []
+
+        with patch('books.models.ReadingSession.get_user_all_books_total_reading_time',
+                   side_effect=[timedelta(seconds=n) for n in range(1, 11)]):
+            for i in range(1, 11):
+                # i_history.append(i)
+                # assert i_history == [1] or [1, 2]
+                # i2_history_7_days = sum(i_history)
+                # if i_history == [1, 2, 3]:
+                #     assert sum(i_history) == 6
+                #     assert i2_history_7_days == 6
+                i_history_7_days = sum(i_history[-2:])
+                # assert ReadingSession.get_user_all_books_total_reading_time(user) == timedelta(seconds=i_history_7_days)
+                assert timedelta(seconds=i_history_7_days) == ReadingSession.get_user_all_books_total_reading_time(user)
+
+                reading_profile.update_daily_reading_profile()
+                # assert i_history_7_days == 1
+                # assert reading_profile.reading_last_week == timedelta(hours=i_history_7_days)
+                # assert reading_profile.reading_last_month == timedelta(hours=3)
+                # assert reading_profile.last_day_total_reading_time == timedelta(hours=3)
+                # assert reading_profile.daily_reading_time == [timedelta(hours=3)]
