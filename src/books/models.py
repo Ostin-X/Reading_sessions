@@ -168,7 +168,7 @@ class ReadingSession(models.Model):
         """
         Calculates and returns the total reading time of the session including new time of active sesison.
         """
-        total_time = self.total_time if self.end_time else self.total_time + (
+        total_time = self.total_time if (self.end_time or not self.start_time) else self.total_time + (
                 get_current_time_in_timezone() - self.start_time)
         return total_time
 

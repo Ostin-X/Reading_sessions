@@ -10,14 +10,18 @@ from books.models import Book, User, ReadingSession
 @pytest.mark.django_db(transaction=True)
 class TestReadingSessionModel:
 
-    def test_start_start_end_session_flow(self, user, five_books):
+    def test_start_start_end_session_flow(self, user, fill_books):
+        fill_books(5)
         assert Book.objects.count() == 5
         assert User.objects.count() == 1
         assert ReadingSession.objects.count() == 0
 
-        book1 = five_books[0]
-        book2 = five_books[1]
-        book3 = five_books[2]
+        book1 = Book.objects.first()
+        book2 = Book.objects.exclude(pk=book1.pk).first()
+        book3 = Book.objects.last()
+
+        assert book1 and book2 and book3
+        assert book1.pk != book2.pk and book2.pk != book3.pk and book1.pk != book3.pk
 
         # Creating session, not starting.
         reading_session1 = ReadingSession.objects.create(user=user, book=book1)
@@ -131,14 +135,17 @@ class TestReadingSessionModel:
 
         assert get_user_all_books_total_reading_time == test_value['total_time']
 
-    def test_user_book_change_time(self, five_users, five_books):
+    def test_user_book_change_time(self, fill_users, fill_books):
+        assert fill_books(5) == 5
+        assert fill_users(5) == 5
+
         assert Book.objects.count() == 5
         assert User.objects.count() == 5
 
-        user1 = five_users[0]
-        user2 = five_users[1]
-        book1 = five_books[0]
-        book2 = five_books[1]
+        user1 = User.objects.first()
+        user2 = User.objects.exclude(pk=user1.pk).first()
+        book1 = Book.objects.first()
+        book2 = Book.objects.exclude(pk=book1.pk).first()
 
         reading_session = ReadingSession.objects.create(user=user1, book=book1, )
 
