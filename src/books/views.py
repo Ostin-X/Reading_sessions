@@ -12,7 +12,7 @@ from .serializers import ReadingSessionSerializer, UserSerializer, BookSerialize
 from .utils import get_book_and_user
 
 
-class UserModelViewSet(viewsets.ModelViewSet):
+class UserModelViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [OwnOrStuffPermission]
@@ -41,7 +41,7 @@ class UserSignupView(CreateAPIView):
         return Response({"message": message}, status=status_code)
 
 
-class BookModelViewSet(viewsets.ModelViewSet):
+class BookModelViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [ReadOnlyOrStuffPermission]
@@ -50,7 +50,7 @@ class BookModelViewSet(viewsets.ModelViewSet):
     ordering_fields = ('title', 'author', 'publication_year')
 
 
-class ReadingSessionModelViewSet(viewsets.ModelViewSet):
+class ReadingSessionModelViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ReadingSession.objects.all()
     serializer_class = ReadingSessionSerializer
     permission_classes = [ReadOnlyOrStuffPermission]
