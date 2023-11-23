@@ -1,33 +1,51 @@
 # Reading Sessions
-This charitable project aims to create a website for a cat shelter. The website will serve as a platform to raise awareness and support for the shelter, as well as provide information about its activities, feline residents, and ways to contribute. Through an intuitive interface, users can learn about adoptable cats, donate towards medical care and upkeep, and even volunteer. Developing the website will efficiently enhance and expand the shelter's operations in the online sphere.
 
-## Getting Started
-### **Clone the Project from GitLab:**
+Api for book readers. Lets you keep time spent on each book
 
--   Copy the repository URL from GitLab.
--   Open a terminal and navigate to the directory where you want to save the project.
--   Execute the command:
+[Read me! Task notes](./documentation/task-notes.md)
 
-    `git clone <repository_URL>`.
+Do `docker-compose up --build` for quick start or look [here](./documentation/setup.md) for some additional info
 
-### **Install Poetry:**
+## Admin user
 
-To install Poetry, you can use the [official Poetry installer](https://python-poetry.org/docs/#installing-with-the-official-installer). Follow the instructions provided in the official documentation.
+User admin adminpassword automatically created on start of a container. Use it for access to admin panel
 
-### **Install Project Dependencies:**
+## Endpoints
 
-   Run:
+### /swagger/
 
-   `poetry install`
+We have swagger with all endpoints.
 
-### **Run the Project in Docker using docker-compose:**
+### /api/users/ and /api/users/{1}/ {user pk}
 
--   Make sure you have Docker and docker-compose installed.
--   Navigate to the directory containing the `docker-compose.yml` file.
--   Execute:
+List and detail views for User model. List and details for each is available only for admin and stuff users. 
+Owner can view his own profile
 
-    `docker-compose build`
+### /api/books/ and /api/books/{1}/ {book pk}
 
-    `docker-compose up`
+List and detail views for Book model
 
-Now your project should be up and running inside a Docker container. Make sure your repository files and settings are up-to-date and aligned with these steps.
+### /api/books/{1}/start/ and /api/books/{1}/start/ {book pk}
+
+Starts(creates) reading session. Ends reading session. Only for authenticated. 
+Users can Start reading session. If he tries to start again un-ended session with same book, nothing happens, start_time doesn't change.
+Is User starts session with other book, old one closes. Book with start_time and no end_time is is_active.   
+
+### /api/sessions/ and /api/sessions/{1}/ {sessions pk}
+
+List and detail views for ReadingSession model
+
+### /api/login/ /api/logout/ /api/signup/   
+
+Login and signup endpoints. You can create new user and login with new credentials. 
+
+## Models
+
+User - standard Django user model. 'username' and 'password' are used.
+
+Book - book model with title, author, publication_year and description fields. 'book_total_reading_time' property returns time spent on book by all users
+
+ReadingSession - unique_together for User and Book. Created one time for User-Book pair. Gets reopen when user returns to same book. Stores 'start_time', 'end_time'
+for last activation, or no 'end_time' if user currently reading this book. Has a ton of methods and properties. Starts and Ends reading, handles total reading info.
+
+ReadingProfile - OneToOne with User. Stores last 31 days (updates) of reading statistics. Has 'reading_last_week' and 'reading_last_month' info

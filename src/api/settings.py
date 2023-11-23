@@ -9,7 +9,7 @@ from books.tasks import default_schedule
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = Env()
-env_file_path = os.path.join(BASE_DIR, "../.env")
+env_file_path = os.path.join(BASE_DIR, "../.env.local")
 env.read_env(env_file=env_file_path)
 
 # For testing purposes
@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': env.str('DATABASE_NAME', default='books_db'),
         'USER': env('DATABASE_USER', default='postgres'),
         'PASSWORD': env('DATABASE_PASS', default='qweqweqweqwe'),
-        'HOST': env('DATABASE_HOST', default='db'),
+        'HOST': env('DATABASE_HOST', default='localhost'),
         'PORT': '',
     },
 }
@@ -132,7 +132,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'redirect-to-user-detail'
 
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379')
+CELERY_BROKER_URL = env.str('CELERY_BROKER_URL', 'redis://redis:6379')
 
 CELERY_BEAT_SCHEDULE = {
     'daily-update-profiles': {

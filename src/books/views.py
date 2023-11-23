@@ -81,7 +81,7 @@ class EndReading(APIView):
     """
 
     def post(self, request, *args, **kwargs):
-        user, book = get_book_and_user(kwargs, request)
+        user, book = get_book_and_user(request, kwargs)
 
         if user is None or book is None:
             return Response({"error": "User or Book not found."},
