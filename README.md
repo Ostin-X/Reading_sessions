@@ -39,6 +39,12 @@ List and detail views for ReadingSession model
 
 Login and signup endpoints. You can create new user and login with new credentials. 
 
+## Docker
+
+docker-compose file with main api service rs-api, nginx, redis, celery and worker for background tasks. 
+On reach run 10 users and 10 books are created. Additionally, admin user admin:adminpassword. Task for 'daily_update_profiles' runs every minute
+to faster simulate api work.
+
 ## Models
 
 User - standard Django user model. 'username' and 'password' are used.
