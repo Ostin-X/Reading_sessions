@@ -7,18 +7,6 @@ from books.models import User, Book
 
 
 @pytest.fixture
-def auto_login_user(api_client, user, test_password='1234567890'):
-    def make_auto_login():
-        url = reverse("rest_framework:login")
-        data = {"username": user.username, "password": test_password}
-        response = api_client.post(url, data=data)
-        assert response.status_code == 200
-        return api_client, user
-
-    return make_auto_login
-
-
-@pytest.fixture
 def api_client():
     return APIClient()
 
@@ -33,20 +21,25 @@ def user():
 
 
 @pytest.fixture
-def five_users():
-    return [User.objects.create(username=f'testuser{i}') for i in range(1, 6)]
+def fill_users():
+    def create_users(number: int = 10):
+        fake = Faker()
+        created_users = 0
+        for _ in range(number):
+            fake_name = fake.name()
+            while fake_name in User.objects.values_list('username', flat=True):
+                fake_name = fake.name()
+            user = User.objects.create(username=fake_name)
+            created_users += 1
+        return created_users
+
+    return create_users
 
 
 @pytest.fixture
 def book():
     description = get_description(1)
     return Book.objects.create(title='Test Book', author='Test Author', publication_year=1981, description=description)
-
-
-@pytest.fixture
-def five_books():
-    return [Book.objects.create(title=f'testtitle{i}', author=f'testauthor{i}', publication_year=1981,
-                                description=get_description(i)) for i in range(1, 6)]
 
 
 @pytest.fixture
