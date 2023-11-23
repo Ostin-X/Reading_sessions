@@ -21,10 +21,6 @@ class UserModelViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ('username', 'readingsession__book__title')
 
 
-class ValidationError:
-    pass
-
-
 class UserSignupView(CreateAPIView):
     serializer_class = UserSerializer
 
